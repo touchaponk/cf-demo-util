@@ -16,5 +16,5 @@ else
 	appIDLine=`CF_TRACE=true cf app $appName | grep -E \"url\" | grep -E apps`
 	tmp=${appIDLine#*/}
 	appID=${tmp%\"*}
-	cf curl /$appID/instances/$instance -X 'DELETE'
+	cf -v curl /$appID/instances/$instance -X 'DELETE'
 fi

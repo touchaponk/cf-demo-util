@@ -178,6 +178,9 @@ var DetailAppEntry = React.createClass({
         return {stats: null};
     },
     componentDidMount: function () {
+        this.refresh();
+    },
+    refresh: function(cb){
         var self = this;
         var data = {
             method: "GET",
@@ -197,10 +200,13 @@ var DetailAppEntry = React.createClass({
                 for(var i in json){
                     stats.push(json[i]);
                 }
+                console.log("setting stats ", stats);
                 self.setState({stats: stats});
+                if(cb)cb();
             })
             .fail(function (error) {
-                alert(error.statusText);
+                if(error.statusText != "OK")alert(error.statusText);
+                if(cb)cb();
             });
     },
     render: function () {
@@ -209,58 +215,7 @@ var DetailAppEntry = React.createClass({
         var instances = this.state.stats ?
             this.state.stats.map(function (instance, index) {
                 var iid = "daei-"+index;
-                var cname = "gradeX " + ((index % 2 == 0) ? "even" : "odd");
-                var state = instance.state == "RUNNING" ?
-                    ( <span className="label label-sm label-success"> {instance.state} </span>) :
-                    ( <span className="label label-sm label-warning"> {instance.state} </span>);
-                var tstamp = new Date(new Date().getTime() - instance.stats.uptime * 1000).toString();
-                var doKill = function(){
-                    var data = {
-                        method: "DELETE",
-                        url: "https://api.ng.bluemix.net/v2/apps/" + this.props.guid + "/instances/"+index,
-                        headers: {
-                            "Authorization": "bearer " + window.token
-                        }
-                    };
-                    $.ajax({
-                        type: "POST",
-                        url: "/api",
-                        data: JSON.stringify(data),
-                        contentType: 'application/json; charset=utf-8',
-                    })
-                        .done(function (json) {
-                        })
-                        .fail(function (error) {
-                            alert(error.statusText);
-                        });
-                };
-                return (
-                    <tr key = {iid} className={cname} role="row">
-
-                        <td className="sorting_1">{index}</td>
-                        <td>{state}</td>
-                        <td className="center">{tstamp}</td>
-
-                        <td className="center">{instance.stats.usage.cpu}</td>
-                        <td className="center">{instance.stats.usage.mem}</td>
-                        <td className="center">{instance.stats.usage.disk}</td>
-                        <td>
-                            <div className="btn-group">
-                                <button className="btn btn-xs green dropdown-toggle" type="button"
-                                        data-toggle="dropdown"
-                                        aria-expanded="false"> Actions
-                                    <i className="fa fa-angle-down"></i>
-                                </button>
-                                <ul className="dropdown-menu" role="menu">
-                                    <li>
-                                        <a href="javascript:void();" onClick={doKill}>
-                                            <i className="icon-docs"></i> Kill </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                );
+                return (<InstanceEntry guid = {self.props.guid} key = {iid} index = {index} instance = {instance} refresh = {self.refresh} />);
             })
             : null;
         return (
@@ -289,6 +244,82 @@ var DetailAppEntry = React.createClass({
         );
     }
 });
+
+var InstanceEntry = React.createClass({
+    getInitialState: function(){
+        return {killing:false}
+    },
+    doKill : function(){
+        var self = this;
+        self.setState({killing:true});
+        var data = {
+            method: "DELETE",
+            url: "https://api.ng.bluemix.net/v2/apps/" + self.props.guid + "/instances/"+self.props.index,
+            headers: {
+                "Authorization": "bearer " + window.token
+            }
+        };
+        $.ajax({
+            type: "POST",
+            url: "/api",
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+        })
+            .done(function (json) {
+                self.props.refresh(function(){
+                    self.setState({killing:false});
+                });
+            })
+            .fail(function (error) {
+                self.props.refresh(function(){
+                    self.setState({killing:false});
+                });
+                if(error.statusText != "OK")alert(error.statusText);
+            });
+    },
+    render: function () {
+        var self = this;
+        var index = this.props.index;
+        var instance = this.props.instance;
+        console.log("rendering instance with data ", instance);
+        var cname = "gradeX " + ((index % 2 == 0) ? "even" : "odd");
+        var state = (<img src="http://developers.gigya.com/download/attachments/14650850/refresh_spin_lg.gif"
+                          style={{"width":"20px","padding": "0"}} />);
+        if(!this.state.killing)state = instance.state == "RUNNING" ?
+            ( <span className="label label-sm label-success"> {instance.state} </span>) :
+            ( <span className="label label-sm label-warning"> {instance.state} </span>);
+        var tstamp = instance.stats?new Date(new Date().getTime() - instance.stats.uptime * 1000).toString():"-";
+        var cpu = instance.stats? Math.round(instance.stats.usage.cpu*100):"-";
+        var mem = instance.stats? (Math.round(instance.stats.usage.mem/1000000)+" MB"):"-";
+        var disk = instance.stats? (Math.round(instance.stats.usage.disk/1000000)+" MB"):"-";
+        return (
+            <tr className={cname} role="row">
+                <td className="sorting_1">{index}</td>
+                <td>{state}</td>
+                <td className="center">{tstamp}</td>
+
+                <td className="center">{cpu}</td>
+                <td className="center">{mem}</td>
+                <td className="center">{disk}</td>
+                <td>
+                    <div className="btn-group">
+                        <button className="btn btn-xs green dropdown-toggle" type="button"
+                                data-toggle="dropdown"
+                                aria-expanded="false"> Actions
+                            <i className="fa fa-angle-down"></i>
+                        </button>
+                        <ul className="dropdown-menu" role="menu">
+                            <li>
+                                <a href="javascript:;" onClick={this.doKill}>
+                                    <i className="icon-docs"></i> Kill </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        );
+    }
+})
 $(document).ready(function () {
     // window.apps = {};
     console.log("initing main script");
