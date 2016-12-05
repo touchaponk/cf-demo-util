@@ -1,17 +1,18 @@
 {
-  "name": "webui",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "name": "NodejsStarterApp",
+  "version": "0.0.1",
+  "description": "A sample nodejs app for Bluemix",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "express": "4.13.3",
     "request": "2.x",
     "body-parser": "1.14.1",
     "cfenv": "1.0.x"
   }
+  "engines": {
+    "node": "0.10.*"
+  },
+  "repository": {}
 }
