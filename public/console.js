@@ -24,10 +24,15 @@ var RunningApps = React.createClass({
         })
             .done(function (json) {
                 self.setState({apps: json.resources});
+                $("#apptable").DataTable({
+                    ordering:false
+                });
             })
             .fail(function (error) {
                 alert(error.statusText);
             });
+    },
+    componentDidUpdate:function(){
     },
     render: function () {
         var self = this;
@@ -66,7 +71,10 @@ var RunningApps = React.createClass({
                 </div>
                 <div className="portlet-body">
                     <div className="table-scrollable">
-                        <table className="table table-striped table-hover">
+                        <table id = "apptable" className="table table-striped table-hover" style = {{
+                            width: "98% !important",
+                            marginLeft: "1% !important"
+                        }}>
                             <thead>
                             <tr>
                                 <th> #</th>
@@ -77,7 +85,7 @@ var RunningApps = React.createClass({
                                 <th> Instances</th>
                                 <th> Memory</th>
                                 <th> Disk</th>
-                                <th> Urls</th>
+                                <th> </th>
                             </tr>
                             </thead>
                             <tbody style={{"textAlign": "left"}}>
@@ -132,7 +140,7 @@ var RunningAppEntry = React.createClass({
         if (this.state.host) {
             var url = this.state.host + ".mybluemix.net";
             var urllink = "http://" + url;
-            appurl = (<a href={urllink} target="_blank">{url}</a>);
+            appurl = (<a href={urllink} target="_blank">View App</a>);
         }
         for (var i in window.spaces) {
             var sp = window.spaces[i];
