@@ -1,7 +1,7 @@
 applications:
 - disk_quota: 1024M
-  host: ikil
-  name: ikil
+  host: myconsole
+  name: MyConsole
   path: .
   domain: mybluemix.net
   instances: 1

@@ -7,10 +7,10 @@ $(document).ready(function () {
         e.preventDefault();
         $(".login-fm").hide();
         $(".load-fm").show();
-
+        var dc = $("#dc").val();
         var data = {
             method: "POST",
-            url: "https://login.ng.bluemix.net/UAALoginServerWAR/oauth/token",
+            url: "https://login."+dc+".bluemix.net/UAALoginServerWAR/oauth/token",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Authorization": "Basic Y2Y6"
@@ -29,7 +29,7 @@ $(document).ready(function () {
             contentType: 'application/json; charset=utf-8',
         })
             .done(function (json) {
-                window.location = "./console.html?access_token="+json.access_token;
+                window.location = "./console.html?dc="+dc+"&access_token="+json.access_token;
             })
             .fail(function (error) {
                 alert(error.statusText);
