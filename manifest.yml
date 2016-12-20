@@ -1,7 +1,7 @@
 applications:
 - disk_quota: 1024M
-  host: my-console
-  name: My-Console
+  host: dashboard
+  name: Dashboard
   path: .
   domain: mybluemix.net
   instances: 1
