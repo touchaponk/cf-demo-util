@@ -1,8 +1,11 @@
 applications:
 - disk_quota: 1024M
-  host: my-console
-  name: My-Console
+  host: ikil-app
+  name: ikil-app
   path: .
-  domain: mybluemix.net
+  domain: au-syd.mybluemix.net
   instances: 1
   memory: 256M
+  random-route: true
+  services:
+     - ikil-mongo
