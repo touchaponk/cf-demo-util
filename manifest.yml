@@ -1,6 +1,5 @@
 applications:
 - disk_quota: 1024M
-  host: ikil-app
   name: ikil-app
   path: .
   domain: au-syd.mybluemix.net
